@@ -1,5 +1,5 @@
-﻿#include"GameScene.h"
-#include"GameView.h"
+﻿#include "GameScene.h"
+#include "GameView.h"
 
 
 Scene* GameSence::createScene() {

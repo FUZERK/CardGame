@@ -24,7 +24,7 @@ const char* getFaceName(CardFaceType value)
 
 const char* getColorName(CardSuitType suit)
 {
-	// Diamonds and hearts use red number art; clubs and spades use black.
+	// 方块和红桃使用红色数字资源，梅花和黑桃使用黑色数字资源
 	return (suit == CST_DIAMONDS || suit == CST_HEARTS) ? "red" : "black";
 }
 

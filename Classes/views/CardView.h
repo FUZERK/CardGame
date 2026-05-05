@@ -2,48 +2,64 @@
 
 #include "cocos2d.h"
 
+#include <functional>
+
 #include "../configs/models/CardResConfig.h"
 
+// 单张卡牌视图，只负责卡牌显示和点击事件捕获
 class CardView : public cocos2d::Node
 {
 public:
-    //带参创建CardView，返回其指针
+    using CardClickCallback = std::function<void(int)>;
+
+    // 创建CardView并应用点数、花色显示数据
     static CardView* create(CardFaceType value, CardSuitType suit);
 
-    // 初始化，创建精灵，成功返回true,否则false
+    // 创建子精灵和触摸监听
     virtual bool init() override;
 
-    // 应用数据并进行刷新,成功返回true,否则false
+    // 应用卡牌数据并刷新资源精灵
     bool initWith(CardFaceType value, CardSuitType suit);
 
+    // 设置当前视图对应的卡牌id
+    void setCardId(int cardId);
+
+    // 获取当前视图对应的卡牌id
+    int getCardId() const;
+
+    // 设置点击回调，点击命中后向外传递cardId
+    void setClickCallback(const CardClickCallback& callback);
+
 private:
-    // 卡牌底色背景
+    // 初始化卡牌底图
     void _initBackground();
 
-    // 卡面数字和花色
+    // 初始化点数精灵
     void _initLabels();
 
+    // 初始化花色精灵
     void _initSuit();
 
-    // 依据当前数据刷新卡面
+    // 初始化触摸监听
+    void _initTouchListener();
+
+    // 根据当前点数和花色刷新贴图
     void _updateView();
 
-    //放置sprite组成卡牌
+    // 按底图范围布局点数和花色
     void _layoutSprites();
 
+    // 判断触摸点是否命中卡牌范围
+    bool _containsTouch(cocos2d::Touch* touch) const;
+
 private:
-    CardFaceType _value;//数值
-    CardSuitType _suit;//花色
+    int _cardId;
+    CardFaceType _value;
+    CardSuitType _suit;
+    CardClickCallback _clickCallback;
 
-    // 底色
     cocos2d::Sprite* _bg;
-
-    // 中心数字
     cocos2d::Sprite* _bigValue;
-
-    // 小数字
     cocos2d::Sprite* _smallValue;
-
-    // 花色
     cocos2d::Sprite* _suitIcon;
 };
