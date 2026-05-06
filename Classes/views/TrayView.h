@@ -18,6 +18,9 @@ public:
     // 根据当前底牌模型刷新显示
     void setTrayCard(const CardModel* cardModel);
 
+    // 获取当前底牌节点所在的世界坐标
+    cocos2d::Vec2 getTrayCardWorldPosition() const;
+
     // 清空当前底牌显示
     void clearTrayCard();
 

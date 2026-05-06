@@ -47,6 +47,21 @@ void PlayFieldView::removeCard(int cardId)
     }
 }
 
+void PlayFieldView::restoreCardWithMove(const CardModel& cardModel, const Vec2& worldStartPosition, float duration)
+{
+    auto cardView = _createCardView(cardModel);
+    if (!cardView) {
+        return;
+    }
+
+    Vec2 localStartPosition = convertToNodeSpace(worldStartPosition);
+    cardView->setPosition(localStartPosition);
+    addChild(cardView);
+    _cardViews.push_back(cardView);
+
+    cardView->runAction(MoveTo::create(duration, cardModel.getPosition()));
+}
+
 void PlayFieldView::setCardClickCallback(const CardClickCallback& callback)
 {
     _cardClickCallback = callback;
@@ -54,19 +69,29 @@ void PlayFieldView::setCardClickCallback(const CardClickCallback& callback)
 
 void PlayFieldView::_addCardView(const CardModel& cardModel)
 {
-    auto cardView = CardView::create(cardModel.getFace(), cardModel.getSuit());
+    auto cardView = _createCardView(cardModel);
     if (!cardView) {
         return;
     }
 
-    cardView->setCardId(cardModel.getId());
     cardView->setPosition(cardModel.getPosition());
+    addChild(cardView);
+    _cardViews.push_back(cardView);
+}
+
+CardView* PlayFieldView::_createCardView(const CardModel& cardModel)
+{
+    auto cardView = CardView::create(cardModel.getFace(), cardModel.getSuit());
+    if (!cardView) {
+        return nullptr;
+    }
+
+    cardView->setCardId(cardModel.getId());
     cardView->setClickCallback([this](int cardId) {
         if (_cardClickCallback) {
             _cardClickCallback(cardId);
         }
     });
 
-    addChild(cardView);
-    _cardViews.push_back(cardView);
+    return cardView;
 }

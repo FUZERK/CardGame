@@ -11,6 +11,7 @@ bool GameView::init() {
 	_initBackGround();
 	_initPlayFieldView();
 	_initTrayView();
+	_initUndoButton();
 
 	return true;
 }
@@ -21,6 +22,10 @@ PlayFieldView* GameView::getPlayFieldView() const {
 
 TrayView* GameView::getTrayView() const {
 	return _trayView;
+}
+
+void GameView::setUndoClickCallback(const UndoClickCallback& callback) {
+	_undoClickCallback = callback;
 }
 
 void GameView::_initBackGround() {
@@ -52,4 +57,18 @@ void GameView::_initTrayView() {
 	_trayView = TrayView::create();
 	_trayView->setPosition(Vec2(540, 300));
 	this->addChild(_trayView, 10);
+}
+
+void GameView::_initUndoButton() {
+	auto label = Label::createWithSystemFont("go back", "Arial", 48);
+	auto item = MenuItemLabel::create(label, [this](Ref*) {
+		if (_undoClickCallback) {
+			_undoClickCallback();
+		}
+	});
+	item->setPosition(Vec2(920, 300));
+
+	auto menu = Menu::create(item, nullptr);
+	menu->setPosition(Vec2::ZERO);
+	this->addChild(menu, 20);
 }

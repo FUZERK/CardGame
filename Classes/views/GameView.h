@@ -2,6 +2,8 @@
 
 #include "cocos2d.h"
 
+#include <functional>
+
 USING_NS_CC;
 
 class PlayFieldView;
@@ -10,6 +12,8 @@ class TrayView;
 // 游戏主视图层，负责组织背景、主牌区和底牌区等UI容器
 class GameView : public cocos2d::Layer {
 public:
+    using UndoClickCallback = std::function<void()>;
+
     CREATE_FUNC(GameView);
 
     // 初始化游戏根UI层
@@ -21,6 +25,9 @@ public:
     // 获取底牌视图，供Controller刷新当前底牌
     TrayView* getTrayView() const;
 
+    // 设置回退按钮点击回调，由Controller接收并处理撤销逻辑
+    void setUndoClickCallback(const UndoClickCallback& callback);
+
 private:
     // 初始化上下背景区域
     void _initBackGround();
@@ -31,9 +38,13 @@ private:
     // 初始化底牌显示容器
     void _initTrayView();
 
+    // 初始化回退按钮
+    void _initUndoButton();
+
 private:
     cocos2d::LayerColor* _bottomBg;
     cocos2d::LayerColor* _topBg;
     PlayFieldView* _playFieldView;
     TrayView* _trayView;
+    UndoClickCallback _undoClickCallback;
 };

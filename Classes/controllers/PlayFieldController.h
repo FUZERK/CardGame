@@ -1,6 +1,9 @@
 ﻿#pragma once
 
+#include "../managers/UndoManager.h"
+
 class GameModel;
+class GameView;
 class PlayFieldView;
 class TrayView;
 
@@ -14,6 +17,9 @@ public:
     // 绑定游戏数据、主牌区视图和底牌视图
     PlayFieldController(GameModel* gameModel, PlayFieldView* playFieldView, TrayView* trayView);
 
+    // 绑定游戏数据和游戏主视图，并从主视图中取得各子视图
+    PlayFieldController(GameModel* gameModel, GameView* gameView);
+
     // 向View注册点击回调
     void bindViewCallbacks();
 
@@ -23,6 +29,9 @@ public:
     // 处理主牌区卡牌点击，匹配成功返回true
     bool handleCardClick(int cardId);
 
+    // 处理回退按钮点击，成功回退一条记录时返回true
+    bool handleUndoClick();
+
 private:
     // 判断指定主牌区卡牌是否能与当前底牌匹配
     bool _canMatchWithTrayCard(int cardId) const;
@@ -30,8 +39,13 @@ private:
     // 将匹配成功的主牌区卡牌替换为新的底牌
     void _replaceTrayWithPlayfieldCard(int cardId);
 
+    // 根据撤销记录恢复一张主牌区卡牌和上一张底牌
+    void _restoreReplaceTrayRecord(const UndoRecord& record);
+
 private:
     GameModel* _gameModel;
+    GameView* _gameView;
     PlayFieldView* _playFieldView;
     TrayView* _trayView;
+    UndoManager _undoManager;
 };

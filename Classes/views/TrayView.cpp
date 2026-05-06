@@ -32,6 +32,14 @@ void TrayView::setTrayCard(const CardModel* cardModel)
     addChild(_trayCardView);
 }
 
+cocos2d::Vec2 TrayView::getTrayCardWorldPosition() const
+{
+    if (_trayCardView) {
+        return _trayCardView->convertToWorldSpace(Vec2::ZERO);
+    }
+    return convertToWorldSpace(Vec2::ZERO);
+}
+
 void TrayView::clearTrayCard()
 {
     if (_trayCardView) {
