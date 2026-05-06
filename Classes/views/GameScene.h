@@ -6,6 +6,7 @@ USING_NS_CC;
 class GameView;
 class GameModel;
 class PlayFieldController;
+class StackController;
 
 
 //负责创建游戏场景
@@ -24,10 +25,11 @@ public:
 
 private:
     // 初始化临时测试牌局数据，后续接入正式配置加载后删除
-    //void _initTestGameData();
+    void _initTestGameData();
 
     //游戏主视图层指针
     GameView* _gameview = nullptr;
     GameModel* _gameModel = nullptr;
     PlayFieldController* _playFieldController = nullptr;
+    StackController* _stackController = nullptr;
 };

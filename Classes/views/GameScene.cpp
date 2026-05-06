@@ -1,10 +1,16 @@
 ﻿#include "GameScene.h"
 #include "GameView.h"
+#include "../configs/loaders/LevelConfigLoader.h"
 #include "../controllers/PlayFieldController.h"
+#include "../controllers/StackController.h"
 #include "../models/GameModel.h"
+#include "../services/GameModelFromLevelGenerator.h"
 
 
 GameSence::~GameSence() {
+	delete _stackController;
+	_stackController = nullptr;
+
 	delete _playFieldController;
 	_playFieldController = nullptr;
 
@@ -23,26 +29,29 @@ bool GameSence::init() {
 	_gameview = GameView::create();
 	this->addChild(_gameview);
 
-	//_initTestGameData();
+	_initTestGameData();
 
 	return true;
 }
 
-//void GameSence::_initTestGameData() {
-//	_gameModel = new GameModel();
-//
-//	// 临时测试数据：当前底牌为8，主牌区可按7、6、5连续匹配，再连续点击回退验证恢复动画。
-//	_gameModel->setTrayCard(CardModel(100, CFT_EIGHT, CST_CLUBS, Vec2::ZERO, CZT_TRAY));
-//	_gameModel->addPlayfieldCard(CardModel(1, CFT_SEVEN, CST_SPADES, Vec2(350, 600), CZT_PLAYFIELD));
-//
-//	_gameModel->addPlayfieldCard(CardModel(2, CFT_SIX, CST_HEARTS, Vec2(300, 800), CZT_PLAYFIELD));
-//	_gameModel->addPlayfieldCard(CardModel(3,  CFT_FIVE, CST_DIAMONDS, Vec2(250, 1000), CZT_PLAYFIELD));
-//
-//	_gameModel->addPlayfieldCard(CardModel(4, CFT_NINE, CST_CLUBS, Vec2(850, 1000), CZT_PLAYFIELD));
-//	_gameModel->addPlayfieldCard(CardModel(5, CFT_TEN, CST_DIAMONDS, Vec2(800, 800), CZT_PLAYFIELD));
-//	_gameModel->addPlayfieldCard(CardModel(6, CFT_JACK, CST_HEARTS, Vec2(750, 600), CZT_PLAYFIELD));
-//
-//	_playFieldController = new PlayFieldController(_gameModel, _gameview);
-//	_playFieldController->bindViewCallbacks();
-//	_playFieldController->refreshView();
-//}
+void GameSence::_initTestGameData() {
+	LevelConfig levelConfig;
+	if (!LevelConfigLoader::loadLevelConfig(1, &levelConfig)) {
+		CCLOG("load level config failed: levelId=%d", 1);
+		return;
+	}
+
+	_gameModel = new GameModel();
+	if (!GameModelFromLevelGenerator::generateGameModel(levelConfig, _gameModel)) {
+		CCLOG("generate game model failed: levelId=%d", levelConfig.getLevelId());
+		return;
+	}
+
+	_playFieldController = new PlayFieldController(_gameModel, _gameview);
+	_playFieldController->bindViewCallbacks();
+	_playFieldController->refreshView();
+
+	_stackController = new StackController(_gameModel, _gameview);
+	_stackController->bindViewCallbacks();
+	_stackController->refreshView();
+}
