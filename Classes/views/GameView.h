@@ -14,6 +14,7 @@ class TrayView;
 class GameView : public cocos2d::Layer {
 public:
     using UndoClickCallback = std::function<void()>;
+    using ExitClickCallback = std::function<void()>;
 
     CREATE_FUNC(GameView);
 
@@ -32,6 +33,9 @@ public:
     // 设置回退按钮点击回调，由Controller接收并处理撤销逻辑
     void setUndoClickCallback(const UndoClickCallback& callback);
 
+    // 设置退出按钮点击回调，由场景处理返回选关界面
+    void setExitClickCallback(const ExitClickCallback& callback);
+
 private:
     // 初始化上下背景区域
     void _initBackGround();
@@ -48,6 +52,9 @@ private:
     // 初始化回退按钮
     void _initUndoButton();
 
+    // 初始化退出按钮
+    void _initExitButton();
+
 private:
     cocos2d::LayerColor* _bottomBg;
     cocos2d::LayerColor* _topBg;
@@ -55,4 +62,5 @@ private:
     StackView* _stackView;
     TrayView* _trayView;
     UndoClickCallback _undoClickCallback;
+    ExitClickCallback _exitClickCallback;
 };

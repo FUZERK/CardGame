@@ -14,6 +14,7 @@ bool GameView::init() {
 	_initTrayView();
 	_initStackView();
 	_initUndoButton();
+	_initExitButton();
 
 	return true;
 }
@@ -32,6 +33,10 @@ StackView* GameView::getStackView() const {
 
 void GameView::setUndoClickCallback(const UndoClickCallback& callback) {
 	_undoClickCallback = callback;
+}
+
+void GameView::setExitClickCallback(const ExitClickCallback& callback) {
+	_exitClickCallback = callback;
 }
 
 void GameView::_initBackGround() {
@@ -79,6 +84,20 @@ void GameView::_initUndoButton() {
 		}
 	});
 	item->setPosition(Vec2(920, 300));
+
+	auto menu = Menu::create(item, nullptr);
+	menu->setPosition(Vec2::ZERO);
+	this->addChild(menu, 20);
+}
+
+void GameView::_initExitButton() {
+	auto label = Label::createWithSystemFont("exit", "Arial", 48);
+	auto item = MenuItemLabel::create(label, [this](Ref*) {
+		if (_exitClickCallback) {
+			_exitClickCallback();
+		}
+	});
+	item->setPosition(Vec2(150, 300));
 
 	auto menu = Menu::create(item, nullptr);
 	menu->setPosition(Vec2::ZERO);

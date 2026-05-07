@@ -3,10 +3,7 @@
 
 USING_NS_CC;
 
-class GameView;
-class GameModel;
-class PlayFieldController;
-class StackController;
+class GameController;
 
 
 //负责创建游戏场景
@@ -17,19 +14,20 @@ public:
     //创建并返回一个Scene指针
     static cocos2d::Scene* createScene();
 
+    // 按关卡id创建并返回一个Scene指针
+    static cocos2d::Scene* createScene(int levelId);
+
     //场景初始化，成功返回true，否则false
     virtual bool init();
+
+    // 使用指定关卡id初始化游戏场景
+    bool initWithLevelId(int levelId);
 
     //自动生成create方法
     CREATE_FUNC(GameSence);
 
 private:
-    // 初始化临时测试牌局数据，后续接入正式配置加载后删除
-    void _initTestGameData();
-
-    //游戏主视图层指针
-    GameView* _gameview = nullptr;
-    GameModel* _gameModel = nullptr;
-    PlayFieldController* _playFieldController = nullptr;
-    StackController* _stackController = nullptr;
+    // 游戏总控制器，负责启动和管理当前关卡
+    GameController* _gameController = nullptr;
+    int _levelId = 1;
 };
