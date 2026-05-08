@@ -5,13 +5,16 @@
 #include "../models/GameModel.h"
 #include "../views/GameView.h"
 #include "../views/PlayFieldView.h"
+#include "../views/StackView.h"
 #include "../views/TrayView.h"
 
 PlayFieldController::PlayFieldController(GameModel* gameModel, PlayFieldView* playFieldView)
     : _gameModel(gameModel)
     , _gameView(nullptr)
     , _playFieldView(playFieldView)
+    , _stackView(nullptr)
     , _trayView(nullptr)
+    , _undoManager(&_localUndoManager)
 {
 }
 
@@ -19,7 +22,9 @@ PlayFieldController::PlayFieldController(GameModel* gameModel, PlayFieldView* pl
     : _gameModel(gameModel)
     , _gameView(nullptr)
     , _playFieldView(playFieldView)
+    , _stackView(nullptr)
     , _trayView(trayView)
+    , _undoManager(&_localUndoManager)
 {
 }
 
@@ -27,7 +32,19 @@ PlayFieldController::PlayFieldController(GameModel* gameModel, GameView* gameVie
     : _gameModel(gameModel)
     , _gameView(gameView)
     , _playFieldView(gameView ? gameView->getPlayFieldView() : nullptr)
+    , _stackView(gameView ? gameView->getStackView() : nullptr)
     , _trayView(gameView ? gameView->getTrayView() : nullptr)
+    , _undoManager(&_localUndoManager)
+{
+}
+
+PlayFieldController::PlayFieldController(GameModel* gameModel, GameView* gameView, UndoManager* undoManager)
+    : _gameModel(gameModel)
+    , _gameView(gameView)
+    , _playFieldView(gameView ? gameView->getPlayFieldView() : nullptr)
+    , _stackView(gameView ? gameView->getStackView() : nullptr)
+    , _trayView(gameView ? gameView->getTrayView() : nullptr)
+    , _undoManager(undoManager ? undoManager : &_localUndoManager)
 {
 }
 
@@ -85,16 +102,21 @@ bool PlayFieldController::handleUndoClick()
     }
 
     UndoRecord record;
-    if (!_undoManager.popRecord(&record)) {
+    if (!_undoManager || !_undoManager->popRecord(&record)) {
         return false;
     }
 
-    if (record.actionType != UAT_REPLACE_TRAY_WITH_PLAYFIELD_CARD) {
-        return false;
+    if (record.actionType == UAT_REPLACE_TRAY_WITH_PLAYFIELD_CARD) {
+        _restoreReplaceTrayRecord(record);
+        return true;
     }
 
-    _restoreReplaceTrayRecord(record);
-    return true;
+    if (record.actionType == UAT_EXCHANGE_TRAY_WITH_STACK_CARD) {
+        _restoreExchangeTrayWithStackRecord(record);
+        return true;
+    }
+
+    return false;
 }
 
 bool PlayFieldController::_canMatchWithTrayCard(int cardId) const
@@ -121,8 +143,8 @@ void PlayFieldController::_replaceTrayWithPlayfieldCard(int cardId)
     }
 
     const CardModel* previousTrayCard = _gameModel->getTrayCard();
-    if (previousTrayCard) {
-        _undoManager.recordReplaceTrayWithPlayfieldCard(*previousTrayCard, *playfieldCard);
+    if (previousTrayCard && _undoManager) {
+        _undoManager->recordReplaceTrayWithPlayfieldCard(*previousTrayCard, *playfieldCard);
     }
 
     CardModel nextTrayCard = *playfieldCard;
@@ -141,6 +163,58 @@ void PlayFieldController::_replaceTrayWithPlayfieldCard(int cardId)
 
     if (_trayView) {
         _trayView->setTrayCard(_gameModel->getTrayCard());
+    }
+}
+
+void PlayFieldController::_restoreExchangeTrayWithStackRecord(const UndoRecord& record)
+{
+    auto& stackCards = _gameModel->getMutableStackCards();
+    CardModel* currentStackCard = nullptr;
+    for (auto& stackCard : stackCards) {
+        if (stackCard.getId() == record.beforeCard.getId()) {
+            currentStackCard = &stackCard;
+            break;
+        }
+    }
+
+    if (!currentStackCard) {
+        return;
+    }
+
+    cocos2d::Vec2 stackWorldPosition = _stackView ? _stackView->getCardWorldPosition(currentStackCard->getId()) : cocos2d::Vec2::ZERO;
+    cocos2d::Vec2 trayWorldPosition = _trayView ? _trayView->getTrayCardWorldPosition() : cocos2d::Vec2::ZERO;
+
+    CardModel restoredStackCard = record.afterCard;
+    restoredStackCard.setZone(CZT_STACK);
+    restoredStackCard.setClickable(false);
+    restoredStackCard.setRemoved(false);
+
+    CardModel restoredTrayCard = record.beforeCard;
+    restoredTrayCard.setZone(CZT_TRAY);
+    restoredTrayCard.setClickable(false);
+    restoredTrayCard.setRemoved(false);
+
+    *currentStackCard = restoredStackCard;
+    _gameModel->setTrayCard(restoredTrayCard);
+
+    if (_stackView) {
+        _stackView->playMoveCardToWorldPosition(record.beforeCard.getId(), trayWorldPosition, 0.2f);
+    }
+
+    if (_trayView) {
+        _trayView->playMoveTrayCardToWorldPosition(stackWorldPosition, 0.2f, [this]() {
+            if (_stackView) {
+                _stackView->setCards(_gameModel->getStackCards());
+            }
+            if (_trayView) {
+                _trayView->setTrayCard(_gameModel->getTrayCard());
+            }
+        });
+    }
+    else {
+        if (_stackView) {
+            _stackView->setCards(_gameModel->getStackCards());
+        }
     }
 }
 

@@ -11,6 +11,17 @@ void UndoManager::recordReplaceTrayWithPlayfieldCard(const CardModel& previousTr
     _undoModel.pushRecord(record);
 }
 
+void UndoManager::recordExchangeTrayWithStackCard(const CardModel& previousTrayCard, const CardModel& stackCard)
+{
+    UndoRecord record;
+    record.actionType = UAT_EXCHANGE_TRAY_WITH_STACK_CARD;
+    record.cardId = stackCard.getId();
+    record.beforeCard = previousTrayCard;
+    record.afterCard = stackCard;
+
+    _undoModel.pushRecord(record);
+}
+
 bool UndoManager::popRecord(UndoRecord* outRecord)
 {
     return _undoModel.popRecord(outRecord);

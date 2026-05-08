@@ -9,6 +9,9 @@ public:
     // 记录一次主牌区卡牌替换底牌的操作
     void recordReplaceTrayWithPlayfieldCard(const CardModel& previousTrayCard, const CardModel& playfieldCard);
 
+    // 记录一次底牌和Stack区卡牌交换的操作
+    void recordExchangeTrayWithStackCard(const CardModel& previousTrayCard, const CardModel& stackCard);
+
     // 弹出最近一条撤销记录
     bool popRecord(UndoRecord* outRecord);
 

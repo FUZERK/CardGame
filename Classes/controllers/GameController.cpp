@@ -44,6 +44,8 @@ bool GameController::startGame(int levelId)
 
 void GameController::_clearCurrentGame()
 {
+    _undoManager.clear();
+
     delete _stackController;
     _stackController = nullptr;
 
@@ -95,8 +97,8 @@ bool GameController::_createGameView()
 
 void GameController::_initSubControllers()
 {
-    _playFieldController = new PlayFieldController(_gameModel, _gameView);
-    _stackController = new StackController(_gameModel, _gameView);
+    _playFieldController = new PlayFieldController(_gameModel, _gameView, &_undoManager);
+    _stackController = new StackController(_gameModel, _gameView, &_undoManager);
 }
 
 void GameController::_initSubControllerViews()

@@ -5,6 +5,7 @@
 class GameModel;
 class GameView;
 class PlayFieldView;
+class StackView;
 class TrayView;
 
 // 主牌区控制器，负责接收主牌区点击事件、执行匹配规则并同步模型和视图
@@ -19,6 +20,9 @@ public:
 
     // 绑定游戏数据和游戏主视图，并从主视图中取得各子视图
     PlayFieldController(GameModel* gameModel, GameView* gameView);
+
+    // 绑定游戏数据、游戏主视图和外部撤销管理器
+    PlayFieldController(GameModel* gameModel, GameView* gameView, UndoManager* undoManager);
 
     // 向View注册点击回调
     void bindViewCallbacks();
@@ -42,10 +46,15 @@ private:
     // 根据撤销记录恢复一张主牌区卡牌和上一张底牌
     void _restoreReplaceTrayRecord(const UndoRecord& record);
 
+    // 根据撤销记录恢复一次底牌和Stack区卡牌交换
+    void _restoreExchangeTrayWithStackRecord(const UndoRecord& record);
+
 private:
     GameModel* _gameModel;
     GameView* _gameView;
     PlayFieldView* _playFieldView;
+    StackView* _stackView;
     TrayView* _trayView;
-    UndoManager _undoManager;
+    UndoManager* _undoManager;
+    UndoManager _localUndoManager;
 };

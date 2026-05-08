@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "../models/GameModel.h"
+#include "../managers/UndoManager.h"
 #include "../views/GameView.h"
 #include "../views/StackView.h"
 #include "../views/TrayView.h"
@@ -12,6 +13,16 @@ StackController::StackController(GameModel* gameModel, GameView* gameView)
     , _gameView(gameView)
     , _stackView(gameView ? gameView->getStackView() : nullptr)
     , _trayView(gameView ? gameView->getTrayView() : nullptr)
+    , _undoManager(nullptr)
+{
+}
+
+StackController::StackController(GameModel* gameModel, GameView* gameView, UndoManager* undoManager)
+    : _gameModel(gameModel)
+    , _gameView(gameView)
+    , _stackView(gameView ? gameView->getStackView() : nullptr)
+    , _trayView(gameView ? gameView->getTrayView() : nullptr)
+    , _undoManager(undoManager)
 {
 }
 
@@ -20,6 +31,7 @@ StackController::StackController(GameModel* gameModel, StackView* stackView, Tra
     , _gameView(nullptr)
     , _stackView(stackView)
     , _trayView(trayView)
+    , _undoManager(nullptr)
 {
 }
 
@@ -75,6 +87,10 @@ bool StackController::_exchangeTrayWithStackCard(int cardId)
 
     CardModel previousTrayCard = *_gameModel->getTrayCard();
     CardModel clickedStackCard = *targetIter;
+    if (_undoManager) {
+        _undoManager->recordExchangeTrayWithStackCard(previousTrayCard, clickedStackCard);
+    }
+
     cocos2d::Vec2 stackWorldPosition = _stackView ? _stackView->getCardWorldPosition(cardId) : cocos2d::Vec2::ZERO;
     cocos2d::Vec2 trayWorldPosition = _trayView ? _trayView->getTrayCardWorldPosition() : cocos2d::Vec2::ZERO;
 

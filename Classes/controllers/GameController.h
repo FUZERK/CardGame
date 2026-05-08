@@ -4,6 +4,8 @@
 
 #include <functional>
 
+#include "../managers/UndoManager.h"
+
 class GameModel;
 class GameView;
 class PlayFieldController;
@@ -39,5 +41,6 @@ private:
     GameView* _gameView = nullptr;
     PlayFieldController* _playFieldController = nullptr;
     StackController* _stackController = nullptr;
+    UndoManager _undoManager;
     ExitGameCallback _exitGameCallback;
 };

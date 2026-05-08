@@ -4,12 +4,14 @@ class GameModel;
 class GameView;
 class StackView;
 class TrayView;
+class UndoManager;
 
 // 备用牌堆控制器，负责处理Stack区点击交换并同步模型和视图
 class StackController
 {
 public:
     StackController(GameModel* gameModel, GameView* gameView);
+    StackController(GameModel* gameModel, GameView* gameView, UndoManager* undoManager);
     StackController(GameModel* gameModel, StackView* stackView, TrayView* trayView);
 
     // 向StackView注册点击回调
@@ -29,4 +31,5 @@ private:
     GameView* _gameView;
     StackView* _stackView;
     TrayView* _trayView;
+    UndoManager* _undoManager;
 };
